@@ -158,17 +158,19 @@ def obtenerProductos():
         listaProductos = []
         for prod in prods:
             # Obtener los datos de la categoría correspondiente al ID del producto
-            categoria = Categorias.objects(id=prod.categoria).first()
+            categoria = prod.categoria
             if categoria:
-                # Convertir el producto y la categoría a diccionarios y agregarlos a la lista
+                categoria_dict = categoria.to_mongo().to_dict()
+                categoria_dict['_id'] = str(categoria_dict['_id'])  # Convertir ObjectId a cadena
                 producto_dict = prod.to_mongo().to_dict()
                 producto_dict['_id'] = str(producto_dict['_id'])  # Convertir ObjectId a cadena
-                producto_dict['categoria'] = categoria.to_mongo().to_dict()
+                producto_dict['categoria'] = categoria_dict
                 listaProductos.append(producto_dict)
         retorno = {'productos': listaProductos}
         return jsonify(retorno)
     except Exception as e:
         return jsonify({'error': str(e)})
+
 
     
 
