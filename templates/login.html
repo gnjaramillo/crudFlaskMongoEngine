@@ -1,0 +1,62 @@
+<!-- login.html -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <!-- sweetalert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css"> 
+            <!-- css -->
+    <link rel="stylesheet" href="../static/css/app.css">
+        
+    <title>Iniciar Sesión</title>
+</head>
+<body>
+
+    <h2>Iniciar Sesión</h2>
+
+
+{% if mensaje_error %}
+    <script>
+        // Mostrar el mensaje de error de correo o contraseña en un Sweet Alert
+        Swal.fire({
+            icon: 'error',
+            title: '{{ mensaje_error }}',
+            showConfirmButton: false,
+            timer: 3000
+        });
+    </script>
+{% endif %}
+
+
+
+{% if mensaje %}
+    <script>
+        // Mostrar el mensaje  de cerrar sesión correctamente en un Sweet Alert
+        Swal.fire({
+        icon: 'success',
+        title: '{{ mensaje }}',
+        showConfirmButton: false,
+        timer: 3000 // El mensaje se mostrará durante 3 segundos
+        });
+        
+    </script>
+{% endif %}
+
+
+
+    <form action="/" method="POST">
+        <label for="correo">Correo electrónico:</label><br>
+        <input type="email" id="correo" name="correo" required><br>
+        <label for="contrasena">Contraseña:</label><br>
+        <input type="password" id="contrasena" name="contrasena" required><br><br>
+        <input type="submit" value="Iniciar sesión">
+    </form>
+
+
+
+
+</body>
+</html>

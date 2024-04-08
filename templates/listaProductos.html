@@ -1,0 +1,148 @@
+{% extends 'index.html' %}
+
+{% block encabezado %}
+    {% include 'encabezado.html' %}
+{% endblock %}
+
+{% block contenido %}
+        <!-- datatables -->
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.datatables.net/2.0.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.dataTables.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.print.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.dataTables.css">
+        <!-- sweetalert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+        <!-- css -->
+<link rel="stylesheet" href="../static/css/app.css">
+
+
+
+
+{% if 'usuario' in session and mensaje_inicio_sesion %}
+<script>
+    // Mostrar el mensaje de inicio de sesión en un Sweet Alert
+    Swal.fire({
+        icon: 'success',
+        title: '{{ mensaje_inicio_sesion }}',
+        showConfirmButton: false,
+        timer: 3000 // El mensaje se mostrará durante 3 segundos
+    });
+</script>
+{% endif %}
+
+
+
+<!-- HTML con clases de Bootstrap (alert y alert-success o alert-danger dependiendo del estado). -->
+{% if mensaje_producto_agregado %}
+<div class="alert alert-{{ 'success' if estado else 'danger' }}" role="alert">
+    {{ mensaje_producto_agregado }}
+</div>
+{% endif %} 
+
+
+
+{% if mensaje_producto_agregado %}
+    <script>
+        // Mostrar el mensaje usando Swal.fire
+        Swal.fire({
+            icon: "{{ 'success' if estado else 'error' }}",
+            title: "{{ mensaje_producto_agregado }}",
+            showConfirmButton: false,
+            timer: 3000  // El mensaje se mostrará durante 3 segundos
+        });
+    </script>
+{% endif %}
+
+
+
+
+
+
+
+<form action="/vistaAgregarProducto" method="GET">
+    <button type="submit" class="btn btn-success btnAgregar">Agregar Producto</button>
+</form>
+<form action="/salir" method="GET">
+    <button type="submit" class="btn btn-secondary btnCerrarSesion">Cerrar Sesión</button>
+</form>
+    <div>
+        <table id="tableProducto" class="table table-bordered w-75">
+            <thead>
+                <tr >
+                    <th>Codigo</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Categoria</th>
+                    <th>Imagen</th>
+                    <th>Accion</th>
+                </tr>
+            </thead>
+            <tbody id="listaP">
+                {% for p in productos %}
+
+        <!-- Le pongo un id a cada producto para removerlo de la lista de productos al eliminarlo -->
+                    <tr id="producto_{{ p['_id'] }}">
+                        <td>{{ p['codigo'] }}</td>
+                        <td>{{ p['nombre'] }}</td>
+                        <td>{{ p['precio'] }}</td>
+                        <td>{{ p['categoria'] }}</td>
+                        <td>
+                            <img src="../static/img/{{ p['_id'] }}.jpg" alt="" width="50px">
+                        </td>
+                        <td>   
+
+                            <a href="/consultarProducto/{{ p['codigo'] }}" class="btn btn-primary btneditar" title="Editar">
+                                <i class="fa fa-edit my-1 "></i>
+                            </a> 
+
+        <!--la sintaxis de plantillas de Django {{ p['_id'] }} 
+        es un conjunto de reglas que permite incrustar lógica de Python en plantillas HTML. 
+        los atributos de datos (data-*) se pueden utilizar para almacenar información dinámica 
+        generada en el servidor y hacerla accesible para el código JavaScript.-->
+
+
+                            <button class="btn btn-danger btneliminar" id="btneliminar" data-producto-id="{{ p['_id'] }}" title="Eliminar">
+                                <i class="fa fa-trash text-white my-1"></i>
+                            </button>
+
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- datatables -->
+    <script>
+        
+        new DataTable('#tableProducto', {
+    layout: {
+        topStart: {
+            buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+        }
+    }
+});
+        
+
+    </script>
+
+
+
+
+
+
+
+
+
+{% endblock %}
+
+{% block piePagina %}
+    {% include 'piePagina.html' %}
+{% endblock %}
