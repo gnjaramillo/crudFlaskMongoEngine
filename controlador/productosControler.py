@@ -65,7 +65,7 @@ def agregarProducto():
         nombre = request.form['nombre']
         precio = int(request.form['precio'])
         idCategoria = request.form['cdCategoria']  # Aquí obtenemos el ID de la categoría desde el formulario
-
+        foto = request.files['fileFoto'] 
         # Buscamos el objeto de Categoría correspondiente al ID proporcionado
         categoria = Categorias.objects(id=idCategoria).first()
 
@@ -79,8 +79,16 @@ def agregarProducto():
         
         # Guardamos el producto en la base de datos
         producto.save()
-        
-        mensaje = 'Producto Agregado Correctamente'
+        if producto:
+            idProducto = producto.id 
+            nombreFotos = f'{idProducto}.jpg'
+            #.save() metodo para guardar la imagen adjunta en el sistema de archivos del servidor
+            #os.path.join(): Este es un método del módulo os en Python que se utiliza para unir componentes de ruta en una cadena de ruta. En este caso, se utiliza para concatenar la ruta del directorio de carga (UPLOAD_FOLDER) con el nombre del archivo (nombreFotos), 
+            foto.save(os.path.join(app.config['UPLOAD_FOLDER'], nombreFotos))
+            mensaje = 'Producto Agregado Correctamente'
+            estado = True
+        else:
+            mensaje = 'Problema Al Agregar El Producto'
         estado = True
     except Exception as error:
         mensaje = str(error)
@@ -102,24 +110,46 @@ def agregarProductoJson():
         datos = request.json
         
         # Extrae los datos del producto y la foto del JSON recibido
-        datos_producto = datos.get('producto')
+        producto = datos.get('producto')
         fotoBase64 = datos.get('foto')["foto"]
         
         # Busca la categoría por su ID
-        categoria = Categorias.objects(id=datos_producto["categoria"]).first()
+        categoria = Categorias.objects(id=producto["categoria"]).first()
         
-        # Si la categoría no existe, puedes manejar este caso según tus necesidades
         if not categoria:
             raise Exception('Categoría no encontrada')
         
         # Crea un nuevo producto utilizando el modelo de MongoEngine
         producto = Productos(
-            codigo=int(datos_producto["codigo"]),
-            nombre=datos_producto["nombre"],
-            precio=int(datos_producto["precio"]),
+            codigo=int(producto["codigo"]),
+            nombre=producto["nombre"],
+            precio=int(producto["precio"]),
             categoria=categoria
         )
         producto.save()  # Guarda el producto en la base de datos
+        
+        if producto:
+            idProducto = producto.id 
+            rutaImagen = f"{os.path.join(app.config['UPLOAD_FOLDER'])}/{idProducto}.jpg"
+            
+            # Extrae la parte base64 de la imagen recibida y la decodifica
+            fotoBase64 = fotoBase64[fotoBase64.index(',') + 1]
+            fotoDecodificada = base64.b64decode(fotoBase64)
+            
+            # Abre la imagen decodificada y la guarda en formato JPEG en la ruta especificada
+            imagen = Image.open(BytesIO(fotoDecodificada))
+            imagenJpg = imagen.convert('RGB')
+            imagen.save(rutaImagen)
+            mensaje = 'Producto Agregado Correctamente'
+            estado = True
+        else:
+            mensaje = 'Problema Al Agregar El Producto'
+
+
+
+
+
+
         
         # Define la ruta donde se guardará la imagen del producto
         rutaImagen = f"{app.config['UPLOAD_FOLDER']}/{producto.id}.jpg"
